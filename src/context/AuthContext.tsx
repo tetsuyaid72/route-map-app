@@ -7,6 +7,7 @@ interface AuthContextType {
   user: Omit<User, 'password'> | null;
   isLoading: boolean;
   login: (username: string, password?: string) => Promise<boolean>;
+  register: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
 }
 
@@ -96,6 +97,46 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const register = async (username: string, passwordInput: string): Promise<boolean> => {
+    try {
+      const trimmed = username.trim().toLowerCase();
+
+      if (trimmed.length < 3) {
+        toast.error('Username minimal 3 karakter');
+        return false;
+      }
+
+      if (passwordInput.length < 6) {
+        toast.error('Password minimal 6 karakter');
+        return false;
+      }
+
+      const existing = await db.users.where('username').equals(trimmed).first();
+      if (existing) {
+        toast.error('Username sudah digunakan');
+        return false;
+      }
+
+      const newUser: Omit<User, 'id'> = {
+        username: trimmed,
+        password: passwordInput,
+        role: 'user',
+        created_at: new Date().toISOString()
+      };
+
+      const id = await db.users.add(newUser as User);
+      const safeUser = { id, username: trimmed, role: 'user' as const, created_at: newUser.created_at };
+      setUser(safeUser);
+      localStorage.setItem('routeMap_session', JSON.stringify(safeUser));
+      toast.success('Akun berhasil dibuat! Selamat datang 🎉');
+      return true;
+    } catch (err) {
+      console.error(err);
+      toast.error('Gagal membuat akun');
+      return false;
+    }
+  };
+
   const logout = () => {
     setUser(null);
     localStorage.removeItem('routeMap_session');
@@ -103,7 +144,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );

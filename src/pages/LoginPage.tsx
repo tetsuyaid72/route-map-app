@@ -1,35 +1,68 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { MapPin, User, Lock, LogIn, Info } from 'lucide-react';
-import { useTheme } from '../context/ThemeContext';
+import { MapPin, User, Lock, Eye, EyeOff, ShieldCheck } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function LoginPage() {
-  const { theme } = useTheme();
+  const [activeTab, setActiveTab] = useState<'login' | 'signup'>('login');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { login, user, isLoading } = useAuth();
+  const { login, register, user, isLoading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Redirect if already logged in
     if (user && !isLoading) {
       navigate('/');
     }
   }, [user, isLoading, navigate]);
 
+  const resetForm = () => {
+    setUsername('');
+    setPassword('');
+    setConfirmPassword('');
+    setShowPassword(false);
+  };
+
+  const switchTab = (tab: 'login' | 'signup') => {
+    setActiveTab(tab);
+    resetForm();
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!username.trim() || !password.trim()) return;
 
+    if (activeTab === 'signup') {
+      if (password !== confirmPassword) {
+        toast.error('Password tidak cocok!');
+        return;
+      }
+    }
+
     setIsSubmitting(true);
-    const success = await login(username, password);
+    let success = false;
+
+    if (activeTab === 'login') {
+      success = await login(username, password);
+    } else {
+      success = await register(username, password);
+    }
+
     setIsSubmitting(false);
-    
+
     if (success) {
       navigate('/');
     }
+  };
+
+  const fillDemo = () => {
+    setActiveTab('login');
+    setUsername('admin');
+    setPassword('admin123');
   };
 
   if (isLoading) {
@@ -41,84 +74,109 @@ export default function LoginPage() {
   }
 
   return (
-    <div className={`page-container login-page ${theme === 'dark' ? 'dark' : 'light'}`}>
-      {/* Background elements */}
-      <div className="login-bg-shape shape-1"></div>
-      <div className="login-bg-shape shape-2"></div>
-      <div className="login-bg-shape shape-3"></div>
+    <div className="login-layout-modern">
+      {/* Top Gradient Area */}
+      <div className="login-top-gradient"></div>
 
-      <div className="login-content">
-        <div className="login-header">
-          <div className="login-logo shadow-glow">
-            <MapPin size={36} color="white" strokeWidth={2.5} />
-          </div>
-          <h1>RouteMap</h1>
-          <p>Delivery Assistant System</p>
+      {/* Overlapping Form Card */}
+      <div className="login-bottom-card">
+        
+        {/* Floating Avatar Logo */}
+        <div className="login-floating-avatar" onDoubleClick={fillDemo} title="Double tap to autofill demo">
+          <MapPin size={32} strokeWidth={2.5} className="avatar-icon" />
         </div>
 
-        <form onSubmit={handleSubmit} className="login-form glass glass-shadow rounded-2xl">
-          <h2 className="form-title">Selamat Datang</h2>
-          
-          <div className="input-group">
-            <div className="input-icon-wrapper">
-              <User size={18} className="input-icon" />
-            </div>
-            <input 
-              type="text" 
-              className="login-input" 
-              placeholder="Username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-            />
-          </div>
-
-          <div className="input-group">
-            <div className="input-icon-wrapper">
-              <Lock size={18} className="input-icon" />
-            </div>
-            <input 
-              type="password" 
-              className="login-input" 
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-
-          <button 
-            type="submit" 
-            className="btn-primary login-btn mt-4" 
-            disabled={isSubmitting}
+        {/* Login / Signup Toggle */}
+        <div className="login-toggle-wrapper">
+          <div 
+            className={`login-toggle-btn ${activeTab === 'login' ? 'active' : ''}`}
+            onClick={() => switchTab('login')}
           >
-            {isSubmitting ? 'Memproses...' : (
-              <>
-                <LogIn size={18} /> Masuk
-              </>
-            )}
-          </button>
-        </form>
-
-        <div className="demo-credentials glass">
-          <div className="demo-header">
-            <Info size={16} />
-            <span>Info Demo Akun</span>
+            Login
           </div>
-          <div className="demo-accounts">
-            <div className="demo-role" onClick={() => { setUsername('admin'); setPassword('admin123'); }}>
-              <div className="role-name">Admin</div>
-              <div className="role-creds">admin / admin123</div>
-            </div>
-            <div className="demo-divider"></div>
-            <div className="demo-role" onClick={() => { setUsername('driver'); setPassword('driver123'); }}>
-              <div className="role-name">Driver (User)</div>
-              <div className="role-creds">driver / driver123</div>
-            </div>
+          <div 
+            className={`login-toggle-btn ${activeTab === 'signup' ? 'active' : ''}`}
+            onClick={() => switchTab('signup')}
+          >
+            Sign up
           </div>
-          <p className="demo-hint">*Ketuk akun di atas untuk mengisi otomatis</p>
         </div>
+
+        <form className="login-form-modern" onSubmit={handleSubmit}>
+          
+          {/* Username Input */}
+          <div className="modern-input-glow-wrapper">
+            <div className="modern-input-inner">
+              <User size={18} className="modern-input-icon" strokeWidth={2} />
+              <input 
+                type="text" 
+                placeholder="@username" 
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+              />
+            </div>
+          </div>
+
+          {/* Password Input */}
+          <div className="modern-input-glow-wrapper">
+            <div className="modern-input-inner">
+              <Lock size={18} className="modern-input-icon" strokeWidth={2} />
+              <input 
+                type={showPassword ? 'text' : 'password'} 
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              <div onClick={() => setShowPassword(!showPassword)} style={{cursor: 'pointer', display: 'flex'}}>
+                {showPassword ? (
+                  <EyeOff size={18} className="modern-input-icon-right" strokeWidth={2} />
+                ) : (
+                  <Eye size={18} className="modern-input-icon-right" strokeWidth={2} />
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Confirm Password (Sign Up only) */}
+          {activeTab === 'signup' && (
+            <div className="modern-input-glow-wrapper">
+              <div className="modern-input-inner">
+                <ShieldCheck size={18} className="modern-input-icon" strokeWidth={2} />
+                <input 
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Konfirmasi Password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Submit Button */}
+          <button type="submit" className="modern-submit-btn" disabled={isSubmitting}>
+            {isSubmitting 
+              ? 'Memproses...' 
+              : activeTab === 'login' ? 'Login' : 'Daftar'
+            }
+          </button>
+
+          {/* Footer text */}
+          {activeTab === 'login' ? (
+            <div className="modern-forgot-link">
+              Forgot Password?
+            </div>
+          ) : (
+            <div className="modern-forgot-link">
+              Akun baru akan mendapatkan role <strong>User</strong>
+            </div>
+          )}
+          
+        </form>
       </div>
     </div>
   );
 }
+
