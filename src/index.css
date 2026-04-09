@@ -1,0 +1,966 @@
+/* ============================================
+   THEME VARIABLES
+   ============================================ */
+
+/* Dark Theme (default) */
+:root,
+[data-theme="dark"] {
+  --bg-dark: #121212;
+  --bg-card: rgba(26, 26, 26, 0.7);
+  --bg-card-solid: #1a1a1a;
+  --text-primary: #ffffff;
+  --text-secondary: #a0a0a0;
+  
+  --primary: #3b82f6;
+  --primary-glow: rgba(59, 130, 246, 0.5);
+  --primary-soft: rgba(59, 130, 246, 0.15);
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  --success: #10b981;
+  
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-bg: rgba(30, 30, 30, 0.65);
+  
+  --search-bg: rgba(0, 0, 0, 0.4);
+  --search-bg-focus: rgba(0, 0, 0, 0.6);
+  --input-bg: rgba(255, 255, 255, 0.05);
+  --input-bg-focus: rgba(255, 255, 255, 0.1);
+  --card-hover: rgba(255, 255, 255, 0.03);
+  --divider: rgba(255, 255, 255, 0.05);
+  --notes-bg: rgba(0, 0, 0, 0.2);
+  --scrollbar-thumb: rgba(255, 255, 255, 0.15);
+  
+  --map-tile-url: 'dark';
+  --leaflet-bg: #1a1a2e;
+  --leaflet-ctrl-bg: #1a1a1a;
+  --leaflet-ctrl-color: #ffffff;
+  --leaflet-ctrl-border: rgba(255, 255, 255, 0.08);
+  --leaflet-ctrl-hover: #2a2a2a;
+  --leaflet-attr-bg: rgba(0, 0, 0, 0.5);
+}
+
+/* Light Theme */
+[data-theme="light"] {
+  --bg-dark: #f5f7fa;
+  --bg-card: rgba(255, 255, 255, 0.85);
+  --bg-card-solid: #ffffff;
+  --text-primary: #1a1a2e;
+  --text-secondary: #6b7280;
+  
+  --primary: #2563eb;
+  --primary-glow: rgba(37, 99, 235, 0.35);
+  --primary-soft: rgba(37, 99, 235, 0.1);
+  --danger: #dc2626;
+  --warning: #d97706;
+  --success: #059669;
+  
+  --glass-border: rgba(0, 0, 0, 0.08);
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  
+  --search-bg: rgba(255, 255, 255, 0.8);
+  --search-bg-focus: rgba(255, 255, 255, 0.95);
+  --input-bg: rgba(0, 0, 0, 0.04);
+  --input-bg-focus: rgba(0, 0, 0, 0.06);
+  --card-hover: rgba(0, 0, 0, 0.02);
+  --divider: rgba(0, 0, 0, 0.06);
+  --notes-bg: rgba(0, 0, 0, 0.04);
+  --scrollbar-thumb: rgba(0, 0, 0, 0.15);
+  
+  --map-tile-url: 'light';
+  --leaflet-bg: #e8ecf1;
+  --leaflet-ctrl-bg: #ffffff;
+  --leaflet-ctrl-color: #1a1a2e;
+  --leaflet-ctrl-border: rgba(0, 0, 0, 0.1);
+  --leaflet-ctrl-hover: #f0f0f0;
+  --leaflet-attr-bg: rgba(255, 255, 255, 0.7);
+}
+
+/* ============================================
+   RESET & BASE
+   ============================================ */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  background-color: var(--bg-dark);
+  color: var(--text-primary);
+  overscroll-behavior-y: contain;
+  transition: background-color 0.35s ease, color 0.35s ease;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ============================================
+   GLASSMORPHISM
+   ============================================ */
+
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  transition: background 0.35s ease, border-color 0.35s ease;
+}
+
+.glass-shadow {
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.15);
+}
+
+/* ============================================
+   LAYOUT
+   ============================================ */
+
+.page-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.map-page-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.scrollable-page {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-bottom: 90px;
+  background-color: var(--bg-dark);
+  transition: background-color 0.35s ease;
+}
+
+/* ============================================
+   LEAFLET MAP OVERRIDES
+   ============================================ */
+
+.leaflet-container {
+  background: var(--leaflet-bg) !important;
+  font-family: 'Inter', sans-serif;
+  width: 100% !important;
+  height: 100% !important;
+  transition: background 0.35s ease;
+}
+
+/* Dark mode: invert OSM tiles to create dark map while preserving POI icons */
+.map-dark-mode .leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) brightness(0.95) contrast(1.1) saturate(0.3);
+}
+
+/* Don't invert markers and popups (they sit above tile pane) */
+.map-dark-mode .leaflet-marker-pane,
+.map-dark-mode .leaflet-popup-pane,
+.map-dark-mode .leaflet-overlay-pane canvas {
+  filter: none;
+}
+
+/* Heatmap canvas should not be inverted */
+.map-dark-mode .leaflet-overlay-pane {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+.leaflet-popup-content-wrapper {
+  background: var(--bg-card-solid) !important;
+  color: var(--text-primary) !important;
+  border-radius: 12px !important;
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25) !important;
+}
+
+.leaflet-popup-tip {
+  background: var(--bg-card-solid) !important;
+}
+
+.leaflet-popup-close-button {
+  color: var(--text-secondary) !important;
+}
+
+.leaflet-popup-close-button:hover {
+  color: var(--text-primary) !important;
+}
+
+.leaflet-control-zoom a {
+  background-color: var(--leaflet-ctrl-bg) !important;
+  color: var(--leaflet-ctrl-color) !important;
+  border-color: var(--leaflet-ctrl-border) !important;
+  transition: background-color 0.2s;
+}
+
+.leaflet-control-zoom a:hover {
+  background-color: var(--leaflet-ctrl-hover) !important;
+}
+
+.leaflet-control-attribution {
+  background: var(--leaflet-attr-bg) !important;
+  color: var(--text-secondary) !important;
+  font-size: 10px !important;
+}
+
+.leaflet-control-attribution a {
+  color: var(--primary) !important;
+}
+
+/* ============================================
+   BOTTOM NAVIGATION
+   ============================================ */
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 1000;
+  border-top-left-radius: 24px;
+  border-top-right-radius: 24px;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.7rem;
+  font-weight: 500;
+  gap: 4px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 8px 20px;
+  border-radius: 16px;
+}
+
+.nav-item.active {
+  color: var(--primary);
+  background: var(--primary-soft);
+  transform: translateY(-2px);
+}
+
+.nav-item svg {
+  transition: transform 0.3s ease;
+}
+
+.nav-item.active svg {
+  transform: scale(1.15);
+}
+
+/* ============================================
+   HEADER & SEARCH
+   ============================================ */
+
+.app-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 12px 16px;
+  padding-top: max(12px, env(safe-area-inset-top));
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom-left-radius: 16px;
+  border-bottom-right-radius: 16px;
+}
+
+.search-wrapper {
+  position: relative;
+  flex: 1;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+  background: var(--search-bg);
+  border: 1px solid var(--glass-border);
+  color: var(--text-primary);
+  border-radius: 50px;
+  padding: 10px 16px 10px 40px;
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.search-input:focus {
+  border-color: var(--primary);
+  background: var(--search-bg-focus);
+}
+
+.search-input::placeholder {
+  color: var(--text-secondary);
+}
+
+/* Theme toggle button */
+.theme-toggle {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.theme-toggle:hover {
+  background: var(--primary-soft);
+  border-color: var(--primary);
+}
+
+.theme-toggle:active {
+  transform: scale(0.9);
+}
+
+.theme-toggle svg {
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.theme-toggle:hover svg {
+  transform: rotate(30deg);
+}
+
+/* ============================================
+   FAB
+   ============================================ */
+
+.fab {
+  position: fixed;
+  bottom: 90px;
+  right: 20px;
+  width: 60px;
+  height: 60px;
+  border-radius: 30px;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px var(--primary-glow);
+  z-index: 999;
+  cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  animation: fab-pulse 2s infinite;
+}
+
+@keyframes fab-pulse {
+  0%, 100% { box-shadow: 0 8px 24px var(--primary-glow); }
+  50% { box-shadow: 0 8px 40px var(--primary-glow), 0 0 60px rgba(59,130,246,0.2); }
+}
+
+.fab:active {
+  transform: scale(0.9);
+  animation: none;
+}
+
+/* ============================================
+   PLACEMENT MODE
+   ============================================ */
+
+.placement-banner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 14px 16px;
+  padding-top: max(14px, env(safe-area-inset-top));
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom-left-radius: 16px;
+  border-bottom-right-radius: 16px;
+}
+
+.placement-banner-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.placement-cancel-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid rgba(239,68,68,0.3);
+  background: rgba(239,68,68,0.1);
+  color: #ef4444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.placement-cancel-btn:active {
+  transform: scale(0.9);
+}
+
+.placement-confirm-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 50px;
+  border: none;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(16,185,129,0.4);
+  animation: confirmPop 0.3s ease-out;
+}
+
+@keyframes confirmPop {
+  0% { transform: scale(0.5); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.placement-confirm-btn:active {
+  transform: scale(0.95);
+}
+
+/* Crosshair for tap-to-place guidance */
+.map-crosshair {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 500;
+  pointer-events: none;
+  color: #ef4444;
+  opacity: 0.5;
+  animation: crosshairPulse 2s infinite;
+}
+
+@keyframes crosshairPulse {
+  0%, 100% { opacity: 0.3; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 0.7; transform: translate(-50%, -50%) scale(1.15); }
+}
+
+/* Pin drop animation */
+@keyframes pinBounce {
+  0% { transform: rotate(-45deg) translateY(-30px); opacity: 0; }
+  60% { transform: rotate(-45deg) translateY(4px); }
+  80% { transform: rotate(-45deg) translateY(-2px); }
+  100% { transform: rotate(-45deg) translateY(0); opacity: 1; }
+}
+
+.input-glass {
+  background: var(--input-bg);
+  border: 1px solid var(--glass-border);
+  color: var(--text-primary);
+  padding: 14px 16px;
+  border-radius: 12px;
+  width: 100%;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.input-glass:focus {
+  border-color: var(--primary);
+  background: var(--input-bg-focus);
+}
+
+.input-glass::placeholder {
+  color: var(--text-secondary);
+}
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+
+.btn-primary {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  border: none;
+  padding: 14px;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  width: 100%;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+  opacity: 0.9;
+}
+
+/* ============================================
+   MODAL / BOTTOM SHEET
+   ============================================ */
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 2000;
+  display: flex;
+  align-items: flex-end;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.modal-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.bottom-sheet {
+  width: 100%;
+  background: var(--bg-card-solid);
+  border-top-left-radius: 24px;
+  border-top-right-radius: 24px;
+  padding: 24px;
+  padding-bottom: max(24px, env(safe-area-inset-bottom));
+  transform: translateY(100%);
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1), background-color 0.35s ease;
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.bottom-sheet .handle {
+  width: 40px;
+  height: 4px;
+  background: var(--divider);
+  border-radius: 2px;
+  margin: 0 auto 16px auto;
+}
+
+.modal-overlay.open .bottom-sheet {
+  transform: translateY(0);
+}
+
+.close-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--glass-border);
+  background: var(--input-bg);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.close-btn:hover {
+  background: var(--input-bg-focus);
+  color: var(--text-primary);
+}
+
+/* ============================================
+   GPS BOX
+   ============================================ */
+
+.gps-box {
+  background: var(--input-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background 0.35s ease;
+}
+
+.gps-icon-wrapper {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--primary-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+}
+
+.retry-btn {
+  padding: 6px 14px;
+  border-radius: 50px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  border: none;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* ============================================
+   POPUP BUTTONS
+   ============================================ */
+
+.popup-btn {
+  flex: 1;
+  padding: 8px 0;
+  border-radius: 8px;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.popup-btn:active { opacity: 0.8; }
+
+.popup-btn-secondary {
+  background: var(--input-bg);
+  color: var(--text-primary);
+}
+
+.popup-btn-primary {
+  background: var(--primary);
+  color: white;
+}
+
+.popup-btn-maps {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.popup-btn-maps:active {
+  background: rgba(16, 185, 129, 0.25);
+}
+
+/* ============================================
+   HISTORY CARD
+   ============================================ */
+
+.history-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: transform 0.2s, background 0.35s ease;
+}
+
+.history-card:active {
+  transform: scale(0.98);
+}
+
+.visit-badge {
+  background: var(--primary-soft);
+  color: var(--primary);
+  padding: 4px 12px;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  border: none;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.nav-btn:hover {
+  background: rgba(59, 130, 246, 0.25);
+}
+
+/* ============================================
+   REGION CHIPS & GROUPS
+   ============================================ */
+
+.region-chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 16px;
+  border-radius: 50px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  backdrop-filter: blur(8px);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.25s ease;
+}
+
+.region-chip.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+  box-shadow: 0 4px 12px var(--primary-glow);
+}
+
+.region-chip:active {
+  transform: scale(0.95);
+}
+
+.region-group {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 14px;
+  overflow: hidden;
+  transition: background 0.35s ease;
+}
+
+.region-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.region-count {
+  background: var(--primary-soft);
+  color: var(--primary);
+  padding: 2px 10px;
+  border-radius: 50px;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.hide-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* ============================================
+   SORT BUTTONS
+   ============================================ */
+
+.sort-btn {
+  flex: 1;
+  padding: 10px 0;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.3s;
+}
+
+.sort-btn.active {
+  background: var(--primary);
+  color: white;
+}
+
+.sort-btn.inactive {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  color: var(--text-secondary);
+}
+
+/* ============================================
+   STAT CARDS
+   ============================================ */
+
+.stat-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 8px;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.35s ease;
+}
+
+.stat-card .accent-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+}
+
+.stat-number {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1;
+  margin-top: 8px;
+  color: var(--text-primary);
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+/* ============================================
+   FEATURE CARD
+   ============================================ */
+
+.feature-card {
+  background: var(--primary-soft);
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  border-radius: 20px;
+  padding: 20px;
+  transition: background 0.35s ease;
+}
+
+/* ============================================
+   SEARCH DROPDOWN
+   ============================================ */
+
+.search-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 8px;
+  background: var(--bg-card-solid);
+  border-radius: 12px;
+  border: 1px solid var(--glass-border);
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1001;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+}
+
+.search-result-btn {
+  width: 100%;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--divider);
+  color: var(--text-primary);
+  text-align: left;
+  cursor: pointer;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.15s;
+}
+
+.search-result-btn:hover {
+  background: var(--card-hover);
+}
+
+.search-result-btn:last-child {
+  border-bottom: none;
+}
+
+/* ============================================
+   EMPTY STATE
+   ============================================ */
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: var(--text-secondary);
+  text-align: center;
+  gap: 12px;
+}
+
+/* ============================================
+   GRID
+   ============================================ */
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* ============================================
+   SCROLLBAR
+   ============================================ */
+
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 10px;
+}
