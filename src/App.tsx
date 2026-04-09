@@ -3,7 +3,10 @@ import { Map, Clock, BarChart2 } from 'lucide-react';
 import MapPage from './pages/MapPage';
 import HistoryPage from './pages/HistoryPage';
 import StatsPage from './pages/StatsPage';
+import LoginPage from './pages/LoginPage';
 import { ThemeProvider } from './context/ThemeContext';
+import { AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
 import { Toaster } from 'react-hot-toast';
 
 const BottomNav = () => {
@@ -37,15 +40,20 @@ const BottomNav = () => {
 
 const AppLayout = () => {
   const location = useLocation();
+  const isLoginPage = location.pathname === '/login';
 
   return (
     <div className="page-container">
       <Routes location={location}>
-        <Route path="/" element={<MapPage />} />
-        <Route path="/history" element={<HistoryPage />} />
-        <Route path="/stats" element={<StatsPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        
+        <Route element={<ProtectedRoute />}>
+          <Route path="/" element={<MapPage />} />
+          <Route path="/history" element={<HistoryPage />} />
+          <Route path="/stats" element={<StatsPage />} />
+        </Route>
       </Routes>
-      <BottomNav />
+      {!isLoginPage && <BottomNav />}
     </div>
   );
 };
@@ -53,19 +61,21 @@ const AppLayout = () => {
 function App() {
   return (
     <ThemeProvider>
-      <BrowserRouter>
-        <AppLayout />
-        <Toaster 
-          position="top-center" 
-          toastOptions={{
-            style: {
-              background: 'var(--bg-card-solid)',
-              color: 'var(--text-primary)',
-              border: '1px solid var(--glass-border)'
-            }
-          }} 
-        />
-      </BrowserRouter>
+      <AuthProvider>
+        <BrowserRouter>
+          <AppLayout />
+          <Toaster 
+            position="top-center" 
+            toastOptions={{
+              style: {
+                background: 'var(--bg-card-solid)',
+                color: 'var(--text-primary)',
+                border: '1px solid var(--glass-border)'
+              }
+            }} 
+          />
+        </BrowserRouter>
+      </AuthProvider>
     </ThemeProvider>
   );
 }

@@ -6,6 +6,7 @@ import { Plus, Search, Navigation, History, Star, Sun, Moon, X, Check, MapPin, M
 import { db } from '../db';
 import type { Store } from '../db';
 import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
 import AddStoreModal from '../components/AddStoreModal';
 import { getRegionColor } from '../constants/regions';
 import toast from 'react-hot-toast';
@@ -147,6 +148,7 @@ function MapClickHandler({
 
 export default function MapPage() {
   const { theme, toggleTheme } = useTheme();
+  const { user } = useAuth();
   const isDark = theme === 'dark';
   
   const [stores, setStores] = useState<Store[]>([]);
@@ -370,7 +372,7 @@ export default function MapPage() {
               </div>
             </div>
           </div>
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div className="placement-banner-actions">
             <button className="placement-cancel-btn" onClick={cancelPlacing}>
               <X size={18} />
             </button>
@@ -505,19 +507,21 @@ export default function MapPage() {
                     >
                       <ExternalLink size={14} /> Buka di Maps
                     </button>
-                    <button 
-                      onClick={() => handleDeleteStore(store)}
-                      className="popup-btn"
-                      style={{ 
-                        background: 'rgba(239,68,68,0.12)', 
-                        color: '#ef4444',
-                        border: '1px solid rgba(239,68,68,0.2)',
-                        flex: 'none',
-                        padding: '8px 12px'
-                      }}
-                    >
-                      <Trash2 size={14} />
-                    </button>
+                    {user?.role === 'admin' && (
+                      <button 
+                        onClick={() => handleDeleteStore(store)}
+                        className="popup-btn"
+                        style={{ 
+                          background: 'rgba(239,68,68,0.12)', 
+                          color: '#ef4444',
+                          border: '1px solid rgba(239,68,68,0.2)',
+                          flex: 'none',
+                          padding: '8px 12px'
+                        }}
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>

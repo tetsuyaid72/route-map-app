@@ -1,0 +1,117 @@
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { db, type User } from '../db';
+import toast from 'react-hot-toast';
+
+interface AuthContextType {
+  user: Omit<User, 'password'> | null;
+  isLoading: boolean;
+  login: (username: string, password?: string) => Promise<boolean>;
+  logout: () => void;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<Omit<User, 'password'> | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Initialize DB and Session
+  useEffect(() => {
+    const initAuth = async () => {
+      try {
+        // 1. Seed Accounts if empty
+        const userCount = await db.users.count();
+        if (userCount === 0) {
+          await db.users.bulkAdd([
+            {
+              username: 'admin',
+              password: 'admin123',
+              role: 'admin',
+              created_at: new Date().toISOString()
+            },
+            {
+              username: 'driver',
+              password: 'driver123',
+              role: 'user',
+              created_at: new Date().toISOString()
+            }
+          ]);
+          console.log("Demo accounts seeded.");
+        }
+
+        // 2. Check existing session
+        const sessionStore = localStorage.getItem('routeMap_session');
+        if (sessionStore) {
+          try {
+            const parsedSessionData = JSON.parse(sessionStore);
+            if (parsedSessionData && parsedSessionData.username) {
+               // verify if user still exists
+               const dbUser = await db.users.where('username').equals(parsedSessionData.username).first();
+               if (dbUser) {
+                 const { password, ...safeUser } = dbUser;
+                 setUser(safeUser);
+               } else {
+                 localStorage.removeItem('routeMap_session');
+               }
+            }
+          } catch(e) {
+            localStorage.removeItem('routeMap_session');
+          }
+        }
+      } catch (err) {
+        console.error("Auth init error:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initAuth();
+  }, []);
+
+  const login = async (username: string, passwordInput?: string) => {
+    try {
+      const dbUser = await db.users.where('username').equals(username.trim().toLowerCase()).first();
+      
+      if (!dbUser) {
+        toast.error("Username tidak ditemukan");
+        return false;
+      }
+
+      if (dbUser.password && dbUser.password !== passwordInput) {
+        toast.error("Password salah");
+        return false;
+      }
+
+      const { password, ...safeUser } = dbUser;
+      setUser(safeUser);
+      localStorage.setItem('routeMap_session', JSON.stringify(safeUser));
+      toast.success(`Selamat datang, ${safeUser.username}!`);
+      return true;
+
+    } catch (err) {
+      console.error(err);
+      toast.error("Terjadi kesalahan saat login");
+      return false;
+    }
+  };
+
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem('routeMap_session');
+    toast('Anda telah keluar', { icon: '👋' });
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, isLoading, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+}
